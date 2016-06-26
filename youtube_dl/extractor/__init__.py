@@ -15,7 +15,7 @@ from .adobetv import (
     AdobeTVVideoIE,
 )
 from .adultswim import AdultSwimIE
-from .ae import AEIE
+from .aenetworks import AENetworksIE
 from .aftonbladet import AftonbladetIE
 from .airmozilla import AirMozillaIE
 from .aljazeera import AlJazeeraIE
@@ -333,10 +333,12 @@ from .kuwo import (
 from .la7 import LA7IE
 from .laola1tv import Laola1TvIE
 from .lecture2go import Lecture2GoIE
+from .lemonde import LemondeIE
 from .letv import (
     LetvIE,
     LetvTvIE,
-    LetvPlaylistIE
+    LetvPlaylistIE,
+    LetvCloudIE,
 )
 from .libsyn import LibsynIE
 from .lifenews import (
@@ -777,7 +779,7 @@ from .udemy import (
     UdemyCourseIE
 )
 from .udn import UDNEmbedIE
-from .ultimedia import UltimediaIE
+from .digiteka import DigitekaIE
 from .unistra import UnistraIE
 from .urort import UrortIE
 from .ustream import UstreamIE, UstreamChannelIE
@@ -856,6 +858,7 @@ from .webofstories import (
     WebOfStoriesPlaylistIE,
 )
 from .weibo import WeiboIE
+from .weiqitv import WeiqiTVIE
 from .wimp import WimpIE
 from .wistia import WistiaIE
 from .worldstarhiphop import WorldStarHipHopIE
