@@ -16,6 +16,7 @@ from ..utils import (
     sanitized_Request,
     str_to_int,
     unescapeHTML,
+    mimetype2ext,
 )
 
 
@@ -111,6 +112,13 @@ class DailymotionIE(DailymotionBaseInfoExtractor):
         }
     ]
 
+    @staticmethod
+    def _extract_urls(webpage):
+        # Look for embedded Dailymotion player
+        matches = re.findall(
+            r'<(?:(?:embed|iframe)[^>]+?src=|input[^>]+id=[\'"]dmcloudUrlEmissionSelect[\'"][^>]+value=)(["\'])(?P<url>(?:https?:)?//(?:www\.)?dailymotion\.com/(?:embed|swf)/video/.+?)\1', webpage)
+        return list(map(lambda m: unescapeHTML(m[1]), matches))
+
     def _real_extract(self, url):
         video_id = self._match_id(url)
 
@@ -122,10 +130,13 @@ class DailymotionIE(DailymotionBaseInfoExtractor):
         description = self._og_search_description(webpage) or self._html_search_meta(
             'description', webpage, 'description')
 
-        view_count = str_to_int(self._search_regex(
-            [r'<meta[^>]+itemprop="interactionCount"[^>]+content="UserPlays:(\d+)"',
-             r'video_views_count[^>]+>\s+([\d\.,]+)'],
-            webpage, 'view count', fatal=False))
+        view_count_str = self._search_regex(
+            (r'<meta[^>]+itemprop="interactionCount"[^>]+content="UserPlays:([\s\d,.]+)"',
+             r'video_views_count[^>]+>\s+([\s\d\,.]+)'),
+            webpage, 'view count', fatal=False)
+        if view_count_str:
+            view_count_str = re.sub(r'\s', '', view_count_str)
+        view_count = str_to_int(view_count_str)
         comment_count = int_or_none(self._search_regex(
             r'<meta[^>]+itemprop="interactionCount"[^>]+content="UserComments:(\d+)"',
             webpage, 'comment count', fatal=False))
@@ -150,18 +161,19 @@ class DailymotionIE(DailymotionBaseInfoExtractor):
                     type_ = media.get('type')
                     if type_ == 'application/vnd.lumberjack.manifest':
                         continue
-                    ext = determine_ext(media_url)
-                    if type_ == 'application/x-mpegURL' or ext == 'm3u8':
+                    ext = mimetype2ext(type_) or determine_ext(media_url)
+                    if ext == 'm3u8':
                         formats.extend(self._extract_m3u8_formats(
                             media_url, video_id, 'mp4', preference=-1,
                             m3u8_id='hls', fatal=False))
-                    elif type_ == 'application/f4m' or ext == 'f4m':
+                    elif ext == 'f4m':
                         formats.extend(self._extract_f4m_formats(
                             media_url, video_id, preference=-1, f4m_id='hds', fatal=False))
                     else:
                         f = {
                             'url': media_url,
                             'format_id': 'http-%s' % quality,
+                            'ext': ext,
                         }
                         m = re.search(r'H264-(?P<width>\d+)x(?P<height>\d+)', media_url)
                         if m:
@@ -396,13 +408,13 @@ class DailymotionCloudIE(DailymotionBaseInfoExtractor):
     }]
 
     @classmethod
-    def _extract_dmcloud_url(self, webpage):
-        mobj = re.search(r'<iframe[^>]+src=[\'"](%s)[\'"]' % self._VALID_EMBED_URL, webpage)
+    def _extract_dmcloud_url(cls, webpage):
+        mobj = re.search(r'<iframe[^>]+src=[\'"](%s)[\'"]' % cls._VALID_EMBED_URL, webpage)
         if mobj:
             return mobj.group(1)
 
         mobj = re.search(
-            r'<input[^>]+id=[\'"]dmcloudUrlEmissionSelect[\'"][^>]+value=[\'"](%s)[\'"]' % self._VALID_EMBED_URL,
+            r'<input[^>]+id=[\'"]dmcloudUrlEmissionSelect[\'"][^>]+value=[\'"](%s)[\'"]' % cls._VALID_EMBED_URL,
             webpage)
         if mobj:
             return mobj.group(1)
