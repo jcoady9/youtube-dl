@@ -59,11 +59,8 @@ class OnetBaseIE(InfoExtractor):
                         # TODO: Support Microsoft Smooth Streaming
                         continue
                     elif ext == 'mpd':
-                        # TODO: Current DASH formats are broken - $Time$ pattern in
-                        # <SegmentTemplate> not implemented yet
-                        # formats.extend(self._extract_mpd_formats(
-                        #    video_url, video_id, mpd_id='dash', fatal=False))
-                        continue
+                        formats.extend(self._extract_mpd_formats(
+                            video_url, video_id, mpd_id='dash', fatal=False))
                     else:
                         formats.append({
                             'url': video_url,
@@ -93,7 +90,7 @@ class OnetBaseIE(InfoExtractor):
 
 
 class OnetIE(OnetBaseIE):
-    _VALID_URL = 'https?://(?:www\.)?onet\.tv/[a-z]/[a-z]+/(?P<display_id>[0-9a-z-]+)/(?P<id>[0-9a-z]+)'
+    _VALID_URL = r'https?://(?:www\.)?onet\.tv/[a-z]/[a-z]+/(?P<display_id>[0-9a-z-]+)/(?P<id>[0-9a-z]+)'
     IE_NAME = 'onet.tv'
 
     _TEST = {

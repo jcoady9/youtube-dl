@@ -2,11 +2,11 @@
 from __future__ import unicode_literals
 
 from .mtv import MTVServicesInfoExtractor
-from ..compat import compat_urllib_parse_urlencode
 from ..utils import update_url_query
 
 
 class NickIE(MTVServicesInfoExtractor):
+    # None of videos on the website are still alive?
     IE_NAME = 'nick.com'
     _VALID_URL = r'https?://(?:www\.)?nick(?:jr)?\.com/(?:videos/clip|[^/]+/videos)/(?P<id>[^/?#.]+)'
     _FEED_URL = 'http://udat.mtvnservices.com/service1/dispatch.htm'
@@ -58,10 +58,10 @@ class NickIE(MTVServicesInfoExtractor):
     }]
 
     def _get_feed_query(self, uri):
-        return compat_urllib_parse_urlencode({
+        return {
             'feed': 'nick_arc_player_prime',
             'mgid': uri,
-        })
+        }
 
     def _extract_mgid(self, webpage):
         return self._search_regex(r'data-contenturi="([^"]+)', webpage, 'mgid')
@@ -69,12 +69,15 @@ class NickIE(MTVServicesInfoExtractor):
 
 class NickDeIE(MTVServicesInfoExtractor):
     IE_NAME = 'nick.de'
-    _VALID_URL = r'https?://(?:www\.)?nick\.de/(?:playlist|shows)/(?:[^/]+/)*(?P<id>[^/?#&]+)'
+    _VALID_URL = r'https?://(?:www\.)?(?:nick\.de|nickelodeon\.nl)/(?:playlist|shows)/(?:[^/]+/)*(?P<id>[^/?#&]+)'
     _TESTS = [{
         'url': 'http://www.nick.de/playlist/3773-top-videos/videos/episode/17306-zu-wasser-und-zu-land-rauchende-erdnusse',
         'only_matching': True,
     }, {
         'url': 'http://www.nick.de/shows/342-icarly',
+        'only_matching': True,
+    }, {
+        'url': 'http://www.nickelodeon.nl/shows/474-spongebob/videos/17403-een-kijkje-in-de-keuken-met-sandy-van-binnenuit',
         'only_matching': True,
     }]
 
